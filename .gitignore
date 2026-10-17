@@ -1,0 +1,22 @@
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# Python 虚拟环境
+.venv/
+venv/
+
+# 本地环境配置
+.env
+
+# 训练产物
+checkpoints/
+outputs/
+runs/
+
+# 编辑器和操作系统文件
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
