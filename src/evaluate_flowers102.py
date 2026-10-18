@@ -27,7 +27,7 @@ def main():
     model = SmallResNet(num_classes=102)
     model.load_state_dict(
         torch.load(
-            "outputs/flowers102_resnet.pth",
+            "outputs/flowers102_resnet18_transfer.pth",
             map_location="cpu",
             weights_only=True,
         )
