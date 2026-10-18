@@ -45,6 +45,9 @@ def main():
         average_loss = total_loss / len(loader)
         print(f"Epoch {epoch + 1}/2, Loss: {average_loss:.4f}")
 
+    output_path = "outputs/flowers102_resnet.pth"
+    torch.save(model.state_dict(), output_path)
+    print(f"Model saved to: {output_path}")
 
 if __name__ == "__main__":
     main()
