@@ -1,19 +1,18 @@
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
-
-from models.small_resnet import SmallResNet
+from torchvision import datasets, models, transforms
 
 
 def main():
     transform = transforms.Compose([
-    transforms.Resize((64, 64)),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225],
-    ),
-])
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        ),
+    ])
 
     dataset = datasets.Flowers102(
         root="data",
@@ -24,7 +23,9 @@ def main():
 
     loader = DataLoader(dataset, batch_size=8, shuffle=False)
 
-    model = SmallResNet(num_classes=102)
+    model = models.resnet18(weights=None)
+    model.fc = nn.Linear(model.fc.in_features, 102)
+
     model.load_state_dict(
         torch.load(
             "outputs/flowers102_resnet18_transfer.pth",
@@ -43,9 +44,8 @@ def main():
             correct += (predictions == labels).sum().item()
             total += labels.size(0)
 
-    accuracy = correct / total
     print("Test images:", total)
-    print(f"Test accuracy: {accuracy:.4f}")
+    print(f"Test accuracy: {correct / total:.4f}")
 
 
 if __name__ == "__main__":
