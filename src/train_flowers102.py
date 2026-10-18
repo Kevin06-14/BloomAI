@@ -10,9 +10,15 @@ def main():
     torch.manual_seed(42)
 
     transform = transforms.Compose([
-        transforms.Resize((64, 64)),
-        transforms.ToTensor(),
-    ])
+    transforms.Resize((72, 72)),
+    transforms.RandomCrop(64),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225],
+    ),
+])
 
     dataset = datasets.Flowers102(
         root="data",
@@ -21,7 +27,7 @@ def main():
         download=False,
     )
 
-    loader = DataLoader(dataset, batch_size=8, shuffle=True)
+    loader = DataLoader(dataset, batch_size=16, shuffle=True)
 
     model = SmallResNet(num_classes=102)
     loss_function = nn.CrossEntropyLoss()
@@ -29,7 +35,7 @@ def main():
 
     model.train()
 
-    for epoch in range(2):
+    for epoch in range(15):
         total_loss = 0.0
 
         for images, labels in loader:
@@ -43,7 +49,7 @@ def main():
             total_loss += loss.item()
 
         average_loss = total_loss / len(loader)
-        print(f"Epoch {epoch + 1}/2, Loss: {average_loss:.4f}")
+        print(f"Epoch {epoch + 1}/15, Loss: {average_loss:.4f}")
 
     output_path = "outputs/flowers102_resnet.pth"
     torch.save(model.state_dict(), output_path)
