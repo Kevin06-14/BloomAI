@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import torch
@@ -10,6 +11,7 @@ from torchvision import models, transforms
 
 MODEL_PATH = Path("outputs/flowers102_resnet18_transfer.pth")
 LABELS_PATH = Path("src/flowers102_labels.json")
+LABELS_ZH_PATH = Path("src/flowers102_labels_zh.json")
 
 
 def load_labels():
@@ -17,6 +19,14 @@ def load_labels():
         labels = json.load(file)
     if len(labels) != 102:
         raise ValueError("类别名称文件必须包含 102 个名称")
+    return labels
+
+
+def load_chinese_labels():
+    with LABELS_ZH_PATH.open("r", encoding="utf-8") as file:
+        labels = json.load(file)
+    if len(labels) != 102:
+        raise ValueError("中文类别名称文件必须包含 102 个名称")
     return labels
 def load_model():
     if not MODEL_PATH.exists():
@@ -39,6 +49,9 @@ def load_model():
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(
         description="使用训练好的 Flowers102 模型预测一张图片"
     )
@@ -66,15 +79,22 @@ def main():
     input_tensor = transform(image).unsqueeze(0)
     model = load_model()
     labels = load_labels()
+    labels_zh = load_chinese_labels()
     with torch.no_grad():
         probabilities = torch.softmax(model(input_tensor), dim=1)
-        confidence, prediction = probabilities.max(dim=1)
+        top_probabilities, top_indices = torch.topk(probabilities, k=5, dim=1)
 
     print("Image:", image_path)
-    class_index = prediction.item()
-    print("Predicted class index:", class_index)
-    print("Predicted class name:", labels[class_index])
-    print(f"Confidence: {confidence.item():.4f}")
+    print("Top 5 predictions:")
+    for rank, (probability, index) in enumerate(
+        zip(top_probabilities[0], top_indices[0]),
+        start=1,
+    ):
+        class_index = index.item()
+        print(
+            f"{rank}. {labels[class_index]} ({labels_zh[class_index]}) "
+            f"(class index: {class_index}, probability: {probability.item():.4f})"
+        )
 
 
 if __name__ == "__main__":

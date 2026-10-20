@@ -81,4 +81,4 @@ outputs/flowers102_class_statistics.csv
 outputs/flowers102_class_distribution.png
 ```
 
-预测程序会输出图片路径、类别编号、Flowers102 官方英文类别名称和置信度。类别名称保存在 `src/flowers102_labels.json`，程序会根据模型输出的类别编号读取对应名称。
+预测程序会输出图片路径、类别编号、英文类别名称、中文译名和置信度。名称文件分别保存在 `src/flowers102_labels.json` 和 `src/flowers102_labels_zh.json`，程序会根据模型输出的类别编号读取对应名称。
