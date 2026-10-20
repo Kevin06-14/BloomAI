@@ -2,48 +2,51 @@
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from torchvision import datasets
 
 
 def main():
-    # 这是演示数据，不是真实花卉数据集
-    data = {
-        "flower": [
-            "rose", "rose", "rose",
-            "daisy", "daisy",
-            "sunflower", "sunflower", "sunflower", "sunflower",
-            "tulip",
-        ]
-    }
+    # 读取真实 Flowers102 训练集，而不是手写演示数据。
+    dataset = datasets.Flowers102(
+        root="data",
+        split="train",
+        download=False,
+    )
 
-    # 将字典转换为表格
-    df = pd.DataFrame(data)
+    labels = np.asarray(dataset._labels, dtype=np.int64)
+    counts = pd.Series(labels).value_counts().sort_index()
+    df = pd.DataFrame({
+        "class_index": counts.index,
+        "image_count": counts.values,
+    })
 
-    # 统计每个类别的数量
-    counts = df["flower"].value_counts().sort_index()
-
-    # 输出统计结果
-    print("Flower category statistics (demo data):")
+    print("Flowers102 training category statistics:")
+    print("Total images:", len(labels))
+    print("Total classes:", df["class_index"].nunique())
+    print("Mean images per class:", np.mean(df["image_count"]))
+    print("Minimum images in a class:", np.min(df["image_count"]))
+    print("Maximum images in a class:", np.max(df["image_count"]))
     print(counts)
 
-    # 创建输出目录
     output_dir = Path("outputs")
-    output_dir.mkdir(exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 绘制柱状图
     plt.figure(figsize=(8, 5))
-    counts.plot(kind="bar")
-    plt.title("Flower Category Distribution (Demo Data)")
-    plt.xlabel("Flower Category")
-    plt.ylabel("Count")
+    plt.bar(df["class_index"], df["image_count"])
+    plt.title("Flowers102 Training Category Distribution")
+    plt.xlabel("Class index")
+    plt.ylabel("Image count")
     plt.tight_layout()
 
-    # 保存图片
-    output_path = output_dir / "flower_distribution.png"
+    output_path = output_dir / "flowers102_class_distribution.png"
     plt.savefig(output_path)
     plt.close()
+    df.to_csv(output_dir / "flowers102_class_statistics.csv", index=False)
 
-    print(f"\nChart saved to: {output_path}")
+    print(f"Chart saved to: {output_path}")
+    print(f"Statistics saved to: {output_dir / 'flowers102_class_statistics.csv'}")
 
 
 if __name__ == "__main__":

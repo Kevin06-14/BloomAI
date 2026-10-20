@@ -61,7 +61,9 @@ def main():
         average_loss = total_loss / len(train_loader)
         print(f"Epoch {epoch + 1}/5, Loss: {average_loss:.4f}")
 
-    output_path = Path("outputs") / "flowers102_resnet18_transfer.pth"
+    output_dir = Path("outputs")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "flowers102_resnet18_transfer.pth"
     torch.save(model.state_dict(), output_path)
     print(f"Model saved to: {output_path}")
 
