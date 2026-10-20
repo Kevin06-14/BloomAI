@@ -12,6 +12,17 @@
 - 模型保存、测试集评估和单张图片预测
 - Git 分阶段提交开发历史
 
+## 实验结果
+
+项目保留了两种模型，分别对应考核中的“手写网络”和“迁移学习”：
+
+| 模型 | 说明 | 测试集准确率 |
+| --- | --- | ---: |
+| SmallResNet | 自己编写残差块、跳跃连接和分类层 | 0.1984（19.84%） |
+| ResNet18 | ImageNet 预训练模型迁移学习 | 0.7479（74.79%） |
+
+两项结果都来自 Flowers102 官方测试集，共 6149 张图片。迁移学习模型的结果更高，是因为它使用了已经学习过通用图像特征的预训练权重；手写模型从随机参数开始训练，主要用于展示网络结构和训练流程。
+
 ## 环境
 
 - Python 3.9.13
@@ -56,6 +67,12 @@ python src\train_flowers102_transfer.py
 python src\train_flowers102.py
 ```
 
+训练后会生成：
+
+```text
+outputs/flowers102_resnet.pth
+```
+
 评估测试集：
 
 ```powershell
@@ -94,3 +111,16 @@ outputs/flowers102_class_distribution.png
 ```
 
 预测程序会输出图片路径、类别编号、英文类别名称、中文译名和置信度。名称文件分别保存在 `src/flowers102_labels.json` 和 `src/flowers102_labels_zh.json`，程序会根据模型输出的类别编号读取对应名称。
+
+## 推荐演示顺序
+
+如果需要从头展示项目，可以按以下顺序运行：
+
+```powershell
+python src\analyze_flowers.py
+python src\evaluate_manual_resnet.py
+python src\evaluate_flowers102.py
+python src\predict_image.py --image "C:\path\to\flower.jpg"
+```
+
+其中，训练命令只需要在模型文件不存在时运行；已有模型时直接评估即可。
