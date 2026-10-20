@@ -1,0 +1,65 @@
+import argparse
+from pathlib import Path
+
+import torch
+from PIL import Image
+from torchvision import transforms
+
+from models.small_resnet import SmallResNet
+
+
+MODEL_PATH = Path("outputs/flowers102_resnet.pth")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="使用手写 SmallResNet 预测一张图片"
+    )
+    parser.add_argument("--image", required=True, help="待预测图片的路径")
+    args = parser.parse_args()
+
+    image_path = Path(args.image)
+    if not image_path.exists():
+        raise FileNotFoundError(f"找不到图片文件: {image_path}")
+    if not MODEL_PATH.exists():
+        raise FileNotFoundError(
+            "找不到手写模型，请先运行 python src/train_flowers102.py"
+        )
+
+    transform = transforms.Compose([
+        transforms.Resize((64, 64)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        ),
+    ])
+
+    image = Image.open(image_path).convert("RGB")
+    input_tensor = transform(image).unsqueeze(0)
+
+    model = SmallResNet(num_classes=102)
+    model.load_state_dict(
+        torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
+    )
+    model.eval()
+
+    with torch.no_grad():
+        probabilities = torch.softmax(model(input_tensor), dim=1)
+        top_probabilities, top_indices = torch.topk(probabilities, k=5, dim=1)
+
+    print("Image:", image_path)
+    print("Model: manually implemented SmallResNet")
+    print("Top 5 predictions:")
+    for rank, (probability, index) in enumerate(
+        zip(top_probabilities[0], top_indices[0]),
+        start=1,
+    ):
+        print(
+            f"{rank}. class index {index.item()}, "
+            f"probability {probability.item():.4f}"
+        )
+
+
+if __name__ == "__main__":
+    main()

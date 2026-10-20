@@ -55,6 +55,14 @@ cd C:\Users\LENOVO\BloomAI
 pip install -r requirements.txt
 ```
 
+准备数据集：
+
+```powershell
+python src\prepare_data.py
+```
+
+这个脚本会自动下载并准备 Flowers102 训练集和测试集。网络正常时，新电脑只需要执行一次。
+
 首次训练模型：
 
 ```powershell
@@ -83,6 +91,12 @@ python src\evaluate_flowers102.py
 
 ```powershell
 python src\evaluate_manual_resnet.py
+```
+
+使用手写 ResNet 预测单张图片：
+
+```powershell
+python src\predict_manual_image.py --image "C:\path\to\flower.jpg"
 ```
 
 分析真实数据：
