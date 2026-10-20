@@ -79,6 +79,8 @@ python src\train_flowers102.py
 
 ```text
 outputs/flowers102_resnet.pth
+outputs/manual_training_history.csv
+outputs/manual_training_curves.png
 ```
 
 评估测试集：
@@ -115,7 +117,11 @@ python src\predict_image.py --image "C:\path\to\flower.jpg"
 
 ```text
 outputs/flowers102_resnet18_transfer.pth
+outputs/transfer_training_history.csv
+outputs/transfer_training_curves.png
 ```
+
+训练日志中的 `train_loss` 表示训练集损失，`val_accuracy` 表示每轮在验证集上的准确率。PNG 曲线用于直观看出损失变化和验证准确率变化。
 
 数据分析脚本会生成：
 
