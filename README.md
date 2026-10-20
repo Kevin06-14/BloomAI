@@ -50,10 +50,22 @@ pip install -r requirements.txt
 python src\train_flowers102_transfer.py
 ```
 
+训练手写 ResNet：
+
+```powershell
+python src\train_flowers102.py
+```
+
 评估测试集：
 
 ```powershell
 python src\evaluate_flowers102.py
+```
+
+评估手写 ResNet：
+
+```powershell
+python src\evaluate_manual_resnet.py
 ```
 
 分析真实数据：
