@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 
 import torch
@@ -8,6 +9,15 @@ from torchvision import models, transforms
 
 
 MODEL_PATH = Path("outputs/flowers102_resnet18_transfer.pth")
+LABELS_PATH = Path("src/flowers102_labels.json")
+
+
+def load_labels():
+    with LABELS_PATH.open("r", encoding="utf-8") as file:
+        labels = json.load(file)
+    if len(labels) != 102:
+        raise ValueError("类别名称文件必须包含 102 个名称")
+    return labels
 def load_model():
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
@@ -55,6 +65,7 @@ def main():
     image = Image.open(image_path).convert("RGB")
     input_tensor = transform(image).unsqueeze(0)
     model = load_model()
+    labels = load_labels()
     with torch.no_grad():
         probabilities = torch.softmax(model(input_tensor), dim=1)
         confidence, prediction = probabilities.max(dim=1)
@@ -62,7 +73,7 @@ def main():
     print("Image:", image_path)
     class_index = prediction.item()
     print("Predicted class index:", class_index)
-    print(f"Predicted class name: Flowers102 category {class_index:03d}")
+    print("Predicted class name:", labels[class_index])
     print(f"Confidence: {confidence.item():.4f}")
 
 

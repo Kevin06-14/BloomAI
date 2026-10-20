@@ -81,4 +81,4 @@ outputs/flowers102_class_statistics.csv
 outputs/flowers102_class_distribution.png
 ```
 
-预测程序会输出图片路径、类别编号、可读的类别标签和置信度。Flowers102 在 TorchVision 中以 0 到 101 的类别编号保存；数据下载包不提供花名表，因此程序使用 `Flowers102 category` 前缀，避免把编号错误对应成花名。
+预测程序会输出图片路径、类别编号、Flowers102 官方英文类别名称和置信度。类别名称保存在 `src/flowers102_labels.json`，程序会根据模型输出的类别编号读取对应名称。
