@@ -18,10 +18,10 @@
 
 | 模型 | 说明 | 测试集准确率 |
 | --- | --- | ---: |
-| SmallResNet | 自己编写残差块、跳跃连接和分类层 | 0.1984（19.84%） |
+| ImprovedResNet | 在手写残差块基础上扩大网络容量并优化训练 | 0.2716（27.16%） |
 | ResNet18 | ImageNet 预训练模型迁移学习 | 0.7479（74.79%） |
 
-两项结果都来自 Flowers102 官方测试集，共 6149 张图片。迁移学习模型的结果更高，是因为它使用了已经学习过通用图像特征的预训练权重；手写模型从随机参数开始训练，主要用于展示网络结构和训练流程。
+两项结果都来自 Flowers102 官方测试集，共 6149 张图片。迁移学习模型的结果更高，是因为它使用了已经学习过通用图像特征的预训练权重；改进手写模型从随机参数开始训练，主要用于展示网络结构和训练流程。
 
 ## 环境
 
@@ -69,7 +69,7 @@ python src\prepare_data.py
 python src\train_flowers102_transfer.py
 ```
 
-训练手写 ResNet：
+训练改进版手写 ResNet：
 
 ```powershell
 python src\train_flowers102.py
@@ -78,7 +78,9 @@ python src\train_flowers102.py
 训练后会生成：
 
 ```text
-outputs/flowers102_resnet.pth
+outputs/flowers102_resnet_improved.pth
+outputs/manual_improved_training_history.csv
+outputs/manual_improved_training_curves.png
 outputs/manual_training_history.csv
 outputs/manual_training_curves.png
 ```
@@ -89,13 +91,13 @@ outputs/manual_training_curves.png
 python src\evaluate_flowers102.py
 ```
 
-评估手写 ResNet：
+评估改进版手写 ResNet：
 
 ```powershell
 python src\evaluate_manual_resnet.py
 ```
 
-使用手写 ResNet 预测单张图片：
+使用改进版手写 ResNet 预测单张图片：
 
 ```powershell
 python src\predict_manual_image.py --image "C:\path\to\flower.jpg"

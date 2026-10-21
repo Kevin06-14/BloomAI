@@ -5,10 +5,10 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
-from models.small_resnet import SmallResNet
+from models.small_resnet import ImprovedResNet
 
 
-MODEL_PATH = Path("outputs/flowers102_resnet.pth")
+MODEL_PATH = Path("outputs/flowers102_resnet_improved.pth")
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
         raise FileNotFoundError(f"找不到图片文件: {image_path}")
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
-            "找不到手写模型，请先运行 python src/train_flowers102.py"
+            "找不到改进手写模型，请先运行 python src/train_flowers102.py"
         )
 
     transform = transforms.Compose([
@@ -38,7 +38,7 @@ def main():
     image = Image.open(image_path).convert("RGB")
     input_tensor = transform(image).unsqueeze(0)
 
-    model = SmallResNet(num_classes=102)
+    model = ImprovedResNet(num_classes=102)
     model.load_state_dict(
         torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
     )
@@ -49,7 +49,7 @@ def main():
         top_probabilities, top_indices = torch.topk(probabilities, k=5, dim=1)
 
     print("Image:", image_path)
-    print("Model: manually implemented SmallResNet")
+    print("Model: improved manually implemented ResNet")
     print("Top 5 predictions:")
     for rank, (probability, index) in enumerate(
         zip(top_probabilities[0], top_indices[0]),

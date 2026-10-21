@@ -5,7 +5,7 @@ from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from models.small_resnet import SmallResNet
+from models.small_resnet import ImprovedResNet
 
 
 def main():
@@ -45,14 +45,22 @@ def main():
     loader = DataLoader(dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
-    model = SmallResNet(num_classes=102)
-    loss_function = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    model = ImprovedResNet(num_classes=102)
+    loss_function = nn.CrossEntropyLoss(label_smoothing=0.1)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=0.001,
+        weight_decay=1e-4,
+    )
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=30,
+    )
 
     model.train()
     history = []
 
-    for epoch in range(15):
+    for epoch in range(30):
         total_loss = 0.0
 
         for images, labels in loader:
@@ -81,19 +89,20 @@ def main():
             "val_accuracy": val_accuracy,
         })
         print(
-            f"Epoch {epoch + 1}/15, Loss: {average_loss:.4f}, "
+            f"Epoch {epoch + 1}/30, Loss: {average_loss:.4f}, "
             f"Val accuracy: {val_accuracy:.4f}"
         )
+        scheduler.step()
         model.train()
 
     output_dir = "outputs"
     import os
     os.makedirs(output_dir, exist_ok=True)
-    output_path = f"{output_dir}/flowers102_resnet.pth"
+    output_path = f"{output_dir}/flowers102_resnet_improved.pth"
     torch.save(model.state_dict(), output_path)
     history_df = pd.DataFrame(history)
     history_df.to_csv(
-        f"{output_dir}/manual_training_history.csv", index=False
+        f"{output_dir}/manual_improved_training_history.csv", index=False
     )
     figure, loss_axis = plt.subplots(figsize=(8, 5))
     loss_axis.plot(history_df["epoch"], history_df["train_loss"], marker="o")
@@ -109,13 +118,19 @@ def main():
     accuracy_axis.set_ylabel("Validation accuracy")
     figure.tight_layout()
     figure.savefig(
-        f"{output_dir}/manual_training_curves.png",
+        f"{output_dir}/manual_improved_training_curves.png",
         dpi=150,
     )
     plt.close(figure)
     print(f"Model saved to: {output_path}")
-    print("Training history saved to: outputs/manual_training_history.csv")
-    print("Training curves saved to: outputs/manual_training_curves.png")
+    print(
+        "Training history saved to: "
+        "outputs/manual_improved_training_history.csv"
+    )
+    print(
+        "Training curves saved to: "
+        "outputs/manual_improved_training_curves.png"
+    )
 
 if __name__ == "__main__":
     main()

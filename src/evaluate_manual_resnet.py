@@ -5,11 +5,11 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from models.small_resnet import SmallResNet
+from models.small_resnet import ImprovedResNet
 
 
 def main():
-    model_path = Path("outputs/flowers102_resnet.pth")
+    model_path = Path("outputs/flowers102_resnet_improved.pth")
     if not model_path.exists():
         raise FileNotFoundError(
             "找不到手写 ResNet 模型，请先运行 "
@@ -33,7 +33,7 @@ def main():
     )
     loader = DataLoader(dataset, batch_size=32, shuffle=False)
 
-    model = SmallResNet(num_classes=102)
+    model = ImprovedResNet(num_classes=102)
     model.load_state_dict(
         torch.load(model_path, map_location="cpu", weights_only=True)
     )
@@ -47,7 +47,7 @@ def main():
             correct += (predictions == labels).sum().item()
             total += labels.size(0)
 
-    print("Model: manually implemented SmallResNet")
+    print("Model: improved manually implemented ResNet")
     print("Test images:", total)
     print(f"Test accuracy: {correct / total:.4f}")
 
