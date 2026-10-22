@@ -12,15 +12,21 @@ def main():
     torch.manual_seed(42)
 
     transform = transforms.Compose([
-    transforms.Resize((72, 72)),
-    transforms.RandomCrop(64),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225],
-    ),
-])
+        transforms.Resize((72, 72)),
+        transforms.RandomCrop(64),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(15),
+        transforms.ColorJitter(
+            brightness=0.2,
+            contrast=0.2,
+            saturation=0.2,
+        ),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        ),
+    ])
 
     dataset = datasets.Flowers102(
         root="data",
@@ -42,11 +48,11 @@ def main():
         download=False,
     )
 
-    loader = DataLoader(dataset, batch_size=16, shuffle=True)
+    loader = DataLoader(dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     model = ImprovedResNet(num_classes=102)
-    loss_function = nn.CrossEntropyLoss(label_smoothing=0.1)
+    loss_function = nn.CrossEntropyLoss(label_smoothing=0.05)
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=0.001,
@@ -54,13 +60,16 @@ def main():
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
-        T_max=30,
+        T_max=40,
     )
 
     model.train()
     history = []
 
-    for epoch in range(30):
+    best_val_accuracy = 0.0
+    best_state = None
+
+    for epoch in range(40):
         total_loss = 0.0
 
         for images, labels in loader:
@@ -89,9 +98,15 @@ def main():
             "val_accuracy": val_accuracy,
         })
         print(
-            f"Epoch {epoch + 1}/30, Loss: {average_loss:.4f}, "
+            f"Epoch {epoch + 1}/40, Loss: {average_loss:.4f}, "
             f"Val accuracy: {val_accuracy:.4f}"
         )
+        if val_accuracy > best_val_accuracy:
+            best_val_accuracy = val_accuracy
+            best_state = {
+                key: value.detach().cpu().clone()
+                for key, value in model.state_dict().items()
+            }
         scheduler.step()
         model.train()
 
@@ -99,7 +114,7 @@ def main():
     import os
     os.makedirs(output_dir, exist_ok=True)
     output_path = f"{output_dir}/flowers102_resnet_improved.pth"
-    torch.save(model.state_dict(), output_path)
+    torch.save(best_state or model.state_dict(), output_path)
     history_df = pd.DataFrame(history)
     history_df.to_csv(
         f"{output_dir}/manual_improved_training_history.csv", index=False
@@ -123,6 +138,7 @@ def main():
     )
     plt.close(figure)
     print(f"Model saved to: {output_path}")
+    print(f"Best validation accuracy: {best_val_accuracy:.4f}")
     print(
         "Training history saved to: "
         "outputs/manual_improved_training_history.csv"
