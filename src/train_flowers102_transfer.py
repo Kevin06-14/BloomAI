@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, models, transforms
 import matplotlib.pyplot as plt
 import pandas as pd
+from custom_dataset import FlowersCsvDataset
 
 
 def main():
@@ -21,21 +22,17 @@ def main():
         transforms.Normalize(mean, std),
     ])
 
-    train_data = datasets.Flowers102(
-        root="data",
-        split="train",
+    train_data = FlowersCsvDataset(
+        csv_path="data/custom_split/train.csv",
         transform=train_transform,
-        download=False,
     )
-    val_data = datasets.Flowers102(
-        root="data",
-        split="val",
+    val_data = FlowersCsvDataset(
+        csv_path="data/custom_split/val.csv",
         transform=transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean, std),
         ]),
-        download=False,
     )
 
     train_loader = DataLoader(

@@ -1,11 +1,12 @@
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torchvision import transforms
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from models.small_resnet import ImprovedResNet
+from custom_dataset import FlowersCsvDataset
 
 
 def main():
@@ -28,15 +29,12 @@ def main():
         ),
     ])
 
-    dataset = datasets.Flowers102(
-        root="data",
-        split="train",
+    dataset = FlowersCsvDataset(
+        csv_path="data/custom_split/train.csv",
         transform=transform,
-        download=False,
     )
-    val_dataset = datasets.Flowers102(
-        root="data",
-        split="val",
+    val_dataset = FlowersCsvDataset(
+        csv_path="data/custom_split/val.csv",
         transform=transforms.Compose([
             transforms.Resize((64, 64)),
             transforms.ToTensor(),
@@ -45,7 +43,6 @@ def main():
                 std=[0.229, 0.224, 0.225],
             ),
         ]),
-        download=False,
     )
 
     loader = DataLoader(dataset, batch_size=32, shuffle=True)

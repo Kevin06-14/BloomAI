@@ -1,7 +1,8 @@
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import datasets, models, transforms
+from torchvision import models, transforms
+from custom_dataset import FlowersCsvDataset
 
 
 def main():
@@ -14,11 +15,9 @@ def main():
         ),
     ])
 
-    dataset = datasets.Flowers102(
-        root="data",
-        split="test",
+    dataset = FlowersCsvDataset(
+        csv_path="data/custom_split/test.csv",
         transform=transform,
-        download=False,
     )
 
     loader = DataLoader(dataset, batch_size=8, shuffle=False)
@@ -44,8 +43,8 @@ def main():
             correct += (predictions == labels).sum().item()
             total += labels.size(0)
 
-    print("Test images:", total)
-    print(f"Test accuracy: {correct / total:.4f}")
+    print("Custom test images:", total)
+    print(f"Custom test accuracy: {correct / total:.4f}")
 
 
 if __name__ == "__main__":

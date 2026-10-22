@@ -63,6 +63,14 @@ python src\prepare_data.py
 
 这个脚本会自动下载并准备 Flowers102 训练集和测试集。网络正常时，新电脑只需要执行一次。
 
+创建自定义数据划分：
+
+```powershell
+python src\create_custom_split.py
+```
+
+当前划分约为 5150 张训练图片、918 张测试图片和 2121 张验证图片。三个集合互不重叠；因此报告中应写“自定义测试集准确率”，不要称为 Flowers102 官方测试集准确率。
+
 首次训练模型：
 
 ```powershell
