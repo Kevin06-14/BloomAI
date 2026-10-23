@@ -1,4 +1,6 @@
 import argparse
+import json
+import sys
 from pathlib import Path
 
 import torch
@@ -9,9 +11,22 @@ from models.small_resnet import ImprovedResNet
 
 
 MODEL_PATH = Path("outputs/flowers102_resnet_improved.pth")
+LABELS_PATH = Path("src/flowers102_labels.json")
+LABELS_ZH_PATH = Path("src/flowers102_labels_zh.json")
+
+
+def load_labels(path):
+    with path.open("r", encoding="utf-8") as file:
+        labels = json.load(file)
+    if len(labels) != 102:
+        raise ValueError(f"{path} 必须包含 102 个类别名称")
+    return labels
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(
         description="使用手写 SmallResNet 预测一张图片"
     )
@@ -37,6 +52,8 @@ def main():
 
     image = Image.open(image_path).convert("RGB")
     input_tensor = transform(image).unsqueeze(0)
+    labels = load_labels(LABELS_PATH)
+    labels_zh = load_labels(LABELS_ZH_PATH)
 
     model = ImprovedResNet(num_classes=102)
     model.load_state_dict(
@@ -56,7 +73,8 @@ def main():
         start=1,
     ):
         print(
-            f"{rank}. class index {index.item()}, "
+            f"{rank}. {labels[index.item()]} ({labels_zh[index.item()]}) "
+            f"[class index {index.item()}], "
             f"probability {probability.item():.4f}"
         )
 
