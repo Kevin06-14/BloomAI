@@ -1,42 +1,35 @@
 import csv
 import random
-from collections import defaultdict
 from pathlib import Path
-
-from torchvision import datasets
 
 
 def main():
     random.seed(42)
-    root = Path("data")
-    output_dir = root / "custom_split"
+    data_dir = Path("data/flower_photos")
+    output_dir = Path("data/custom_split")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    datasets.Flowers102(root=root, split="train", download=False)
-    datasets.Flowers102(root=root, split="val", download=False)
-    datasets.Flowers102(root=root, split="test", download=False)
+    class_dirs = sorted(path for path in data_dir.iterdir() if path.is_dir())
+    if len(class_dirs) != 5:
+        raise ValueError("TensorFlow Flowers 数据集应包含 5 个类别")
 
-    all_rows = {}
-    for split in ("train", "val", "test"):
-        dataset = datasets.Flowers102(root=root, split=split, download=False)
-        for path, label in zip(dataset._image_files, dataset._labels):
-            all_rows[str(Path(path))] = int(label)
-
-    by_class = defaultdict(list)
-    for image_path, label in all_rows.items():
-        by_class[label].append(image_path)
-
-    selected = {"train": [], "test": [], "val": []}
-    for label, paths in sorted(by_class.items()):
-        random.shuffle(paths)
-        test_count = min(9, len(paths))
-        train_count = min(60, len(paths) - test_count)
-        selected["test"].extend((path, label) for path in paths[:test_count])
-        selected["train"].extend(
-            (path, label) for path in paths[test_count:test_count + train_count]
+    selected = {"train": [], "val": [], "test": []}
+    for label, class_dir in enumerate(class_dirs):
+        images = sorted(
+            path for path in class_dir.iterdir()
+            if path.suffix.lower() in {".jpg", ".jpeg", ".png"}
         )
+        random.shuffle(images)
+        test_count = int(len(images) * 0.15)
+        val_count = int(len(images) * 0.15)
+        selected["test"].extend((path, label) for path in images[:test_count])
         selected["val"].extend(
-            (path, label) for path in paths[test_count + train_count:]
+            (path, label)
+            for path in images[test_count:test_count + val_count]
+        )
+        selected["train"].extend(
+            (path, label)
+            for path in images[test_count + val_count:]
         )
 
     for split, rows in selected.items():
