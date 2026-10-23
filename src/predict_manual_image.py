@@ -41,17 +41,35 @@ def main():
             "找不到改进手写模型，请先运行 python src/train_flowers102.py"
         )
 
-    transform = transforms.Compose([
-        transforms.Resize((64, 64)),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
-        ),
-    ])
-
     image = Image.open(image_path).convert("RGB")
-    input_tensor = transform(image).unsqueeze(0)
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225],
+    )
+    base_transform = transforms.Compose([
+        transforms.Resize((72, 72)),
+        transforms.CenterCrop(64),
+        transforms.ToTensor(),
+        normalize,
+    ])
+    crop_transform = transforms.Compose([
+        transforms.Resize((72, 72)),
+        transforms.CenterCrop(64),
+        transforms.ToTensor(),
+        normalize,
+    ])
+    flip_transform = transforms.Compose([
+        transforms.Resize((72, 72)),
+        transforms.CenterCrop(64),
+        transforms.RandomHorizontalFlip(p=1.0),
+        transforms.ToTensor(),
+        normalize,
+    ])
+    input_tensors = torch.stack([
+        base_transform(image),
+        crop_transform(image),
+        flip_transform(image),
+    ])
     labels = load_labels(LABELS_PATH)
     labels_zh = load_labels(LABELS_ZH_PATH)
 
@@ -62,14 +80,15 @@ def main():
     model.eval()
 
     with torch.no_grad():
-        probabilities = torch.softmax(model(input_tensor), dim=1)
-        top_probabilities, top_indices = torch.topk(probabilities, k=5, dim=1)
+        probabilities = torch.softmax(model(input_tensors), dim=1).mean(dim=0)
+        top_probabilities, top_indices = torch.topk(probabilities, k=5)
 
     print("Image:", image_path)
     print("Model: improved manually implemented ResNet")
+    print("Inference: 3-view test-time augmentation")
     print("Top 5 predictions:")
     for rank, (probability, index) in enumerate(
-        zip(top_probabilities[0], top_indices[0]),
+        zip(top_probabilities, top_indices),
         start=1,
     ):
         print(
