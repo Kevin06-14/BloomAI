@@ -10,7 +10,7 @@ from custom_dataset import FlowersCsvDataset
 
 
 def main():
-    model_path = Path("outputs/flowers102_resnet_improved.pth")
+    model_path = Path("outputs/tf_flowers_resnet_improved.pth")
     if not model_path.exists():
         raise FileNotFoundError(
             "找不到手写 ResNet 模型，请先运行 "
@@ -32,7 +32,7 @@ def main():
     )
     loader = DataLoader(dataset, batch_size=32, shuffle=False)
 
-    model = ImprovedResNet(num_classes=102)
+    model = ImprovedResNet(num_classes=5)
     model.load_state_dict(
         torch.load(model_path, map_location="cpu", weights_only=True)
     )

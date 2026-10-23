@@ -10,16 +10,16 @@ from torchvision import transforms
 from models.small_resnet import ImprovedResNet
 
 
-MODEL_PATH = Path("outputs/flowers102_resnet_improved.pth")
-LABELS_PATH = Path("src/flowers102_labels.json")
-LABELS_ZH_PATH = Path("src/flowers102_labels_zh.json")
+MODEL_PATH = Path("outputs/tf_flowers_resnet_improved.pth")
+LABELS_PATH = Path("src/tf_flowers_labels.json")
+LABELS_ZH_PATH = Path("src/tf_flowers_labels_zh.json")
 
 
 def load_labels(path):
     with path.open("r", encoding="utf-8") as file:
         labels = json.load(file)
-    if len(labels) != 102:
-        raise ValueError(f"{path} 必须包含 102 个类别名称")
+    if len(labels) != 5:
+        raise ValueError(f"{path} 必须包含 5 个类别名称")
     return labels
 
 
@@ -73,7 +73,7 @@ def main():
     labels = load_labels(LABELS_PATH)
     labels_zh = load_labels(LABELS_ZH_PATH)
 
-    model = ImprovedResNet(num_classes=102)
+    model = ImprovedResNet(num_classes=5)
     model.load_state_dict(
         torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
     )

@@ -1,52 +1,47 @@
-
+import csv
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from torchvision import datasets
 
 
 def main():
-    # 读取真实 Flowers102 训练集，而不是手写演示数据。
-    dataset = datasets.Flowers102(
-        root="data",
-        split="train",
-        download=False,
+    split_dir = Path("data/custom_split")
+    rows = []
+    for split in ("train", "val", "test"):
+        with (split_dir / f"{split}.csv").open(
+            "r", encoding="utf-8", newline=""
+        ) as file:
+            rows.extend(
+                {"split": split, **row}
+                for row in csv.DictReader(file)
+            )
+
+    df = pd.DataFrame(rows)
+    counts = df.groupby(["split", "label"]).size().reset_index(
+        name="image_count"
     )
-
-    labels = np.asarray(dataset._labels, dtype=np.int64)
-    counts = pd.Series(labels).value_counts().sort_index()
-    df = pd.DataFrame({
-        "class_index": counts.index,
-        "image_count": counts.values,
-    })
-
-    print("Flowers102 training category statistics:")
-    print("Total images:", len(labels))
-    print("Total classes:", df["class_index"].nunique())
-    print("Mean images per class:", np.mean(df["image_count"]))
-    print("Minimum images in a class:", np.min(df["image_count"]))
-    print("Maximum images in a class:", np.max(df["image_count"]))
+    print("TensorFlow Flowers statistics:")
+    print("Total images:", len(df))
+    print("Total classes:", df["label"].nunique())
+    print("Mean images per class:", np.mean(counts["image_count"]))
     print(counts)
 
     output_dir = Path("outputs")
     output_dir.mkdir(parents=True, exist_ok=True)
+    counts.to_csv(output_dir / "tf_flowers_class_statistics.csv", index=False)
 
-    plt.figure(figsize=(8, 5))
-    plt.bar(df["class_index"], df["image_count"])
-    plt.title("Flowers102 Training Category Distribution")
+    chart = counts.pivot(
+        index="label", columns="split", values="image_count"
+    ).fillna(0)
+    chart.plot(kind="bar", figsize=(9, 5))
+    plt.title("TensorFlow Flowers Split Distribution")
     plt.xlabel("Class index")
     plt.ylabel("Image count")
     plt.tight_layout()
-
-    output_path = output_dir / "flowers102_class_distribution.png"
-    plt.savefig(output_path)
+    plt.savefig(output_dir / "tf_flowers_class_distribution.png", dpi=150)
     plt.close()
-    df.to_csv(output_dir / "flowers102_class_statistics.csv", index=False)
-
-    print(f"Chart saved to: {output_path}")
-    print(f"Statistics saved to: {output_dir / 'flowers102_class_statistics.csv'}")
 
 
 if __name__ == "__main__":

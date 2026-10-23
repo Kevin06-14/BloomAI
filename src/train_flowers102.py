@@ -48,7 +48,7 @@ def main():
     loader = DataLoader(dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
-    model = ImprovedResNet(num_classes=102)
+    model = ImprovedResNet(num_classes=5)
     loss_function = nn.CrossEntropyLoss(label_smoothing=0.05)
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -110,11 +110,11 @@ def main():
     output_dir = "outputs"
     import os
     os.makedirs(output_dir, exist_ok=True)
-    output_path = f"{output_dir}/flowers102_resnet_improved.pth"
+    output_path = f"{output_dir}/tf_flowers_resnet_improved.pth"
     torch.save(best_state or model.state_dict(), output_path)
     history_df = pd.DataFrame(history)
     history_df.to_csv(
-        f"{output_dir}/manual_improved_training_history.csv", index=False
+        f"{output_dir}/tf_flowers_training_history.csv", index=False
     )
     figure, loss_axis = plt.subplots(figsize=(8, 5))
     loss_axis.plot(history_df["epoch"], history_df["train_loss"], marker="o")
@@ -130,7 +130,7 @@ def main():
     accuracy_axis.set_ylabel("Validation accuracy")
     figure.tight_layout()
     figure.savefig(
-        f"{output_dir}/manual_improved_training_curves.png",
+        f"{output_dir}/tf_flowers_training_curves.png",
         dpi=150,
     )
     plt.close(figure)
@@ -138,11 +138,11 @@ def main():
     print(f"Best validation accuracy: {best_val_accuracy:.4f}")
     print(
         "Training history saved to: "
-        "outputs/manual_improved_training_history.csv"
+        "outputs/tf_flowers_training_history.csv"
     )
     print(
         "Training curves saved to: "
-        "outputs/manual_improved_training_curves.png"
+        "outputs/tf_flowers_training_curves.png"
     )
 
 if __name__ == "__main__":

@@ -65,7 +65,7 @@ class SmallResNet(nn.Module):
 class ImprovedResNet(nn.Module):
     """Larger hand-built ResNet used for the improved experiment."""
 
-    def __init__(self, num_classes=102):
+    def __init__(self, num_classes=5):
         super().__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, padding=1, bias=False),
