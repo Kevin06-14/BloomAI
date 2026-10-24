@@ -39,7 +39,7 @@ python src\create_custom_split.py
 训练手写改进版 ResNet：
 
 ```powershell
-python src\train_flowers102.py
+python src\train_TensorFlowFlowers.py
 ```
 
 训练完成后会生成：

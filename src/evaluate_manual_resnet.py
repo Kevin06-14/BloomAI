@@ -14,7 +14,7 @@ def main():
     if not model_path.exists():
         raise FileNotFoundError(
             "找不到手写 ResNet 模型，请先运行 "
-            "python src/train_flowers102.py"
+            "python src/train_TensorFlowFlowers.py"
         )
 
     transform = transforms.Compose([

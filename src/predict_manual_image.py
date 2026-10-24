@@ -38,7 +38,8 @@ def main():
         raise FileNotFoundError(f"找不到图片文件: {image_path}")
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
-            "找不到改进手写模型，请先运行 python src/train_flowers102.py"
+            "找不到改进手写模型，请先运行 "
+            "python src/train_TensorFlowFlowers.py"
         )
 
     image = Image.open(image_path).convert("RGB")
